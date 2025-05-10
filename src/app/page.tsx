@@ -1,103 +1,130 @@
-import Image from "next/image";
+"use client";
+import React, { useEffect, useState } from "react";
+import StatsDashboard from "@/components/StatsDashboard";
+import DrinkSummaryChart from "@/components/DrinkSummaryChart";
+// import ThemeToggle from "@/components/ThemeToggle"; // Uncomment if implemented
+
+function getToday(dateStr: string) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
+}
+function getMonth(dateStr: string) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  return (
+    d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+  );
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [entries, setEntries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    fetch("/api/entries")
+      .then((res) => res.json())
+      .then((data) => {
+        setEntries(data);
+        setLoading(false);
+      });
+  }, []);
+
+  // Calculate stats
+  const todayStats = { tea: 0, coffee: 0 };
+  const monthStats = { tea: 0, coffee: 0 };
+  entries.forEach((e) => {
+    if (getToday(e.date)) {
+      todayStats.tea += e.tea ?? 0;
+      todayStats.coffee += e.coffee ?? 0;
+    }
+    if (getMonth(e.date)) {
+      monthStats.tea += e.tea ?? 0;
+      monthStats.coffee += e.coffee ?? 0;
+    }
+  });
+
+  // Prepare chart data (last 7 days)
+  const chartLabels: string[] = [];
+  const teaData: number[] = [];
+  const coffeeData: number[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const label = d.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+    chartLabels.push(label);
+    let tea = 0,
+      coffee = 0;
+    entries.forEach((e) => {
+      const ed = new Date(e.date);
+      if (
+        ed.getFullYear() === d.getFullYear() &&
+        ed.getMonth() === d.getMonth() &&
+        ed.getDate() === d.getDate()
+      ) {
+        tea += e.tea ?? 0;
+        coffee += e.coffee ?? 0;
+      }
+    });
+    teaData.push(tea);
+    coffeeData.push(coffee);
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
+      {/* <ThemeToggle /> */}
+      <header className="mb-8 text-center">
+        <h1 className="text-3xl font-bold mb-2">☕ Office Drinks Dashboard</h1>
+        <p className="text-gray-600">
+          Track tea and coffee consumption in your office, live!
+        </p>
+      </header>
+      <main className="max-w-3xl mx-auto flex flex-col gap-6">
+        <StatsDashboard today={todayStats} month={monthStats} />
+        <DrinkSummaryChart
+          labels={chartLabels}
+          teaData={teaData}
+          coffeeData={coffeeData}
+        />
+        <div className="overflow-x-auto bg-white rounded-lg shadow p-4">
+          <h2 className="text-lg font-semibold mb-4">All Entries</h2>
+          <table className="min-w-full">
+            <thead>
+              <tr>
+                <th className="px-4 py-2 text-left">Tea</th>
+                <th className="px-4 py-2 text-left">Coffee</th>
+                <th className="px-4 py-2 text-left">Date</th>
+                <th className="px-4 py-2 text-left">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map((entry) => {
+                const dateObj = new Date(entry.date);
+                const date = dateObj.toLocaleDateString();
+                const time = dateObj.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+                return (
+                  <tr key={entry._id} className="border-t border-gray-200">
+                    <td className="px-4 py-2">{entry.tea}</td>
+                    <td className="px-4 py-2">{entry.coffee}</td>
+                    <td className="px-4 py-2">{date}</td>
+                    <td className="px-4 py-2">{time}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
