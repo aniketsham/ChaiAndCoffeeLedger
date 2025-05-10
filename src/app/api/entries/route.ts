@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   await dbConnect();
   const { searchParams } = new URL(req.url);
   const date = searchParams.get("date");
-  const filter: any = {};
+  const filter: Record<string, unknown> = {};
   if (date) filter.date = { $eq: new Date(date) };
   const entries = await DrinkEntry.find(filter).sort({ date: -1 });
   return NextResponse.json(entries);

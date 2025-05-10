@@ -4,6 +4,13 @@ import StatsDashboard from "@/components/StatsDashboard";
 import DrinkSummaryChart from "@/components/DrinkSummaryChart";
 // import ThemeToggle from "@/components/ThemeToggle"; // Uncomment if implemented
 
+export interface DrinkEntry {
+  _id?: string;
+  tea: number;
+  coffee: number;
+  date: string;
+}
+
 function getToday(dateStr: string) {
   const d = new Date(dateStr);
   const now = new Date();
@@ -22,15 +29,13 @@ function getMonth(dateStr: string) {
 }
 
 export default function Home() {
-  const [entries, setEntries] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [entries, setEntries] = useState<DrinkEntry[]>([]);
 
   useEffect(() => {
     fetch("/api/entries")
       .then((res) => res.json())
       .then((data) => {
         setEntries(data);
-        setLoading(false);
       });
   }, []);
 

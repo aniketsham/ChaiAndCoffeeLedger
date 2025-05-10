@@ -1,8 +1,9 @@
 "use client";
+import type { DrinkEntry } from "@/app/entries/page";
 
 interface DrinkEntryListProps {
-  entries: any[];
-  onEdit: (entry: any) => void;
+  entries: DrinkEntry[];
+  onEdit: (entry: DrinkEntry) => void;
   onDelete: (id: string) => void;
 }
 
@@ -13,7 +14,7 @@ export default function DrinkEntryList({
 }: DrinkEntryListProps) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow">
+      <table className="min-w-full bg-white rounded-lg shadow">
         <thead>
           <tr>
             <th className="px-4 py-2 text-left">Tea</th>
@@ -32,10 +33,7 @@ export default function DrinkEntryList({
               minute: "2-digit",
             });
             return (
-              <tr
-                key={entry._id}
-                className="border-t border-gray-200 dark:border-gray-700"
-              >
+              <tr key={entry._id} className="border-t border-gray-200">
                 <td className="px-4 py-2">{entry.tea}</td>
                 <td className="px-4 py-2">{entry.coffee}</td>
                 <td className="px-4 py-2">{date}</td>
@@ -49,7 +47,7 @@ export default function DrinkEntryList({
                   </button>
                   <button
                     className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition"
-                    onClick={() => onDelete(entry._id)}
+                    onClick={() => onDelete(entry._id!)}
                   >
                     Delete
                   </button>

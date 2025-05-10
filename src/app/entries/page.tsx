@@ -3,12 +3,19 @@ import React, { useEffect, useState } from "react";
 import DrinkEntryList from "@/components/DrinkEntryList";
 import DrinkEntryForm from "@/components/DrinkEntryForm";
 
+export interface DrinkEntry {
+  _id?: string;
+  tea: number;
+  coffee: number;
+  date: string;
+}
+
 export default function EntriesPage() {
-  const [entries, setEntries] = useState<any[]>([]);
-  const [filtered, setFiltered] = useState<any[]>([]);
+  const [entries, setEntries] = useState<DrinkEntry[]>([]);
+  const [filtered, setFiltered] = useState<DrinkEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editEntry, setEditEntry] = useState<any | null>(null);
+  const [editEntry, setEditEntry] = useState<DrinkEntry | null>(null);
 
   useEffect(() => {
     fetchEntries();
@@ -23,15 +30,7 @@ export default function EntriesPage() {
     setLoading(false);
   };
 
-  // Only filter by date if needed
-  const handleFilter = (filters: { date: string }) => {
-    let filtered = entries;
-    if (filters.date)
-      filtered = filtered.filter((e) => e.date.slice(0, 10) === filters.date);
-    setFiltered(filtered);
-  };
-
-  const handleAdd = async (data: any) => {
+  const handleAdd = async (data: DrinkEntry) => {
     await fetch("/api/entries", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -41,12 +40,12 @@ export default function EntriesPage() {
     fetchEntries();
   };
 
-  const handleEdit = (entry: any) => {
+  const handleEdit = (entry: DrinkEntry) => {
     setEditEntry(entry);
     setShowForm(true);
   };
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: DrinkEntry) => {
     await fetch("/api/entries", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -82,7 +81,7 @@ export default function EntriesPage() {
           <div className="mb-4">
             <DrinkEntryForm
               onSubmit={editEntry ? handleUpdate : handleAdd}
-              initialData={editEntry}
+              initialData={editEntry || undefined}
             />
             <button
               className="mt-2 text-sm text-gray-500 hover:underline"

@@ -1,26 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import DrinkEntry from "@/models/DrinkEntry";
 
 const seedData = [
-  { person: "Alice", drinkType: "tea", date: new Date(), quantity: 2 },
-  { person: "Bob", drinkType: "coffee", date: new Date(), quantity: 1 },
-  { person: "Charlie", drinkType: "tea", date: new Date(), quantity: 3 },
-  {
-    person: "Alice",
-    drinkType: "coffee",
-    date: new Date(Date.now() - 86400000),
-    quantity: 1,
-  },
-  {
-    person: "Bob",
-    drinkType: "tea",
-    date: new Date(Date.now() - 86400000),
-    quantity: 2,
-  },
+  { tea: 2, coffee: 1, date: new Date() },
+  { tea: 3, coffee: 0, date: new Date(Date.now() - 86400000) },
+  { tea: 0, coffee: 2, date: new Date(Date.now() - 2 * 86400000) },
 ];
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   await dbConnect();
   await DrinkEntry.deleteMany({});
   const entries = await DrinkEntry.insertMany(seedData);

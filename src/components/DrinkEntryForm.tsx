@@ -1,17 +1,18 @@
 "use client";
 import { useState } from "react";
+import type { DrinkEntry } from "@/app/entries/page";
 
 interface DrinkEntryFormProps {
-  onSubmit: (data: any) => void;
-  initialData?: any;
+  onSubmit: (data: DrinkEntry) => void;
+  initialData?: DrinkEntry;
 }
 
 export default function DrinkEntryForm({
   onSubmit,
   initialData,
 }: DrinkEntryFormProps) {
-  const [tea, setTea] = useState(initialData?.tea ?? 0);
-  const [coffee, setCoffee] = useState(initialData?.coffee ?? 0);
+  const [tea, setTea] = useState<number>(initialData?.tea ?? 0);
+  const [coffee, setCoffee] = useState<number>(initialData?.coffee ?? 0);
 
   return (
     <form
