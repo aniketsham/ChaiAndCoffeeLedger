@@ -1,7 +1,7 @@
 # Office Tea & Coffee Ledger App
 
 This app was made for utility use in our office.
-It is just a side project for office uses
+It is just a side project for office uses.
 A full-stack web application for tracking daily tea and coffee consumption in an office. Built with Next.js (App Router), Tailwind CSS, and MongoDB.
 
 ## Features
